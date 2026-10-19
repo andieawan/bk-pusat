@@ -32,14 +32,21 @@ class PusatSync
         return DB::transaction(function () use ($aktif, $kelas, $siswa) {
             PusatKlien::simpan('tahun_aktif', $aktif['nama']);
             $h = ['kelas' => ['baru' => 0, 'ubah' => 0, 'sama' => 0], 'siswa' => ['baru' => 0, 'ubah' => 0, 'sama' => 0, 'keluar' => 0], 'tahun_aktif' => $aktif['nama']];
+            $adaKelas = [];
             foreach ($kelas as $k) {
-                $h['kelas'][self::upsertKelas($k)]++;
+                $adaKelas[$k['uuid']] = true;
+                $h['kelas'][self::upsertKelas($k, true)]++;
+            }
+            foreach (Kelas::whereNull('dihapus_pada')->get(['id', 'pusat_uuid']) as $k) {
+                if (! isset($adaKelas[$k->pusat_uuid])) {
+                    Kelas::whereKey($k->id)->update(['dihapus_pada' => now('UTC')->format('Y-m-d H:i:s')]);
+                }
             }
             self::tandaiTahunAktif();
             $ada = [];
             foreach ($siswa as $p) {
                 $ada[$p['uuid']] = true;
-                $h['siswa'][self::upsertSiswa($p)]++;
+                $h['siswa'][self::upsertSiswa($p, true)]++;
             }
             foreach (Siswa::where('status', 'aktif')->get(['id', 'pusat_uuid']) as $s) {
                 if (! isset($ada[$s->pusat_uuid])) {
@@ -48,25 +55,57 @@ class PusatSync
                 }
             }
             PusatKlien::simpan('sinkron_terakhir', now('UTC')->format('Y-m-d H:i:s'));
+            PusatKlien::hapus('perlu_sinkron');
 
             return $h;
         });
     }
 
-    /** @return 'baru'|'ubah'|'sama' */
-    public static function upsertKelas(array $k): string
+    /** Waktu "diperbarui" dari Pusat (ISO 8601) → UTC "Y-m-d H:i:s", atau null. */
+    private static function versi(array $p): ?string
     {
-        $data = [
-            'nama' => (string) ($k['nama'] ?? ''), 'tingkat' => $k['tingkat'] ?? null, 'jurusan' => $k['jurusan_kode'] ?? null,
-            'tahun_ajaran' => $k['tahun_ajaran'] ?? null, 'wali_uuid' => $k['wali_uuid'] ?? null, 'wali_nama' => $k['wali_nama'] ?? null,
-        ];
+        try {
+            return empty($p['diperbarui']) ? null : \Illuminate\Support\Carbon::parse((string) $p['diperbarui'])->utc()->format('Y-m-d H:i:s');
+        } catch (\Throwable) {
+            return null;
+        }
+    }
 
-        return self::simpanModel(Kelas::where('pusat_uuid', $k['uuid'])->first(), Kelas::class, ['pusat_uuid' => $k['uuid']], $data);
+    /** Kiriman lebih lama dari data yang sudah ada (mis. pengiriman ulang yang terlambat) tidak boleh menimpa. */
+    private static function kedaluwarsa($lama, ?string $versi): bool
+    {
+        return $lama && $versi !== null && $lama->pusat_diperbarui !== null && $versi < (string) $lama->pusat_diperbarui;
+    }
+
+    /** $terkini: data diambil langsung dari API (sinkron penuh), bukan kiriman webhook yang bisa terlambat. @return 'baru'|'ubah'|'sama' */
+    public static function upsertKelas(array $k, bool $terkini = false): string
+    {
+        $lama = Kelas::where('pusat_uuid', $k['uuid'])->first();
+        $versi = self::versi($k);
+        if (! $terkini && self::kedaluwarsa($lama, $versi)) { // sinkron penuh = keadaan terkini Pusat, selalu diterapkan
+            return 'sama';
+        }
+        $data = [
+            'nama' => (string) ($k['nama'] ?? $lama?->nama ?? ''), 'tingkat' => $k['tingkat'] ?? null, 'jurusan' => $k['jurusan_kode'] ?? null,
+            'tahun_ajaran' => $k['tahun_ajaran'] ?? null, 'wali_uuid' => $k['wali_uuid'] ?? null, 'wali_nama' => $k['wali_nama'] ?? null,
+            // Kelas yang dihapus di Pusat tetap disimpan (riwayat catatan BK) tetapi tidak lagi aktif.
+            'dihapus_pada' => ! empty($k['dihapus']) ? ($lama?->dihapus_pada ?? now('UTC')->format('Y-m-d H:i:s')) : null,
+        ];
+        if ($versi !== null) {
+            $data['pusat_diperbarui'] = $versi;
+        }
+
+        return self::simpanModel($lama, Kelas::class, ['pusat_uuid' => $k['uuid']], $data);
     }
 
     /** @return 'baru'|'ubah'|'sama' */
-    public static function upsertSiswa(array $p): string
+    public static function upsertSiswa(array $p, bool $terkini = false): string
     {
+        $lama = Siswa::where('pusat_uuid', $p['uuid'])->first();
+        $versi = self::versi($p);
+        if (! $terkini && self::kedaluwarsa($lama, $versi)) { // sinkron penuh = keadaan terkini Pusat, selalu diterapkan
+            return 'sama';
+        }
         $peta = ['nis' => 'nis', 'nisn' => 'nisn', 'nama' => 'nama', 'jenis_kelamin' => 'jk', 'status' => 'status', 'tempat_lahir' => 'tempat_lahir',
             'tanggal_lahir' => 'tanggal_lahir', 'no_hp_ortu' => 'no_hp_ortu', 'nama_ortu' => 'nama_ortu'];
         $data = [];
@@ -76,12 +115,20 @@ class PusatSync
             }
         }
         if (array_key_exists('kelas_uuid', $p)) {
-            $data['kelas_id'] = $p['kelas_uuid'] ? Kelas::where('pusat_uuid', $p['kelas_uuid'])->value('id') : null;
+            $kelasId = $p['kelas_uuid'] ? Kelas::where('pusat_uuid', $p['kelas_uuid'])->value('id') : null;
+            if ($p['kelas_uuid'] && ! $kelasId) {
+                // Kelas tujuan belum dikenal (kirimannya belum tiba): pertahankan kelas lama, minta sinkron penuh.
+                PusatKlien::simpan('perlu_sinkron', 1);
+            } else {
+                $data['kelas_id'] = $kelasId;
+            }
         }
         if (! empty($p['dihapus'])) {
             $data['status'] = 'keluar';
         }
-        $lama = Siswa::where('pusat_uuid', $p['uuid'])->first();
+        if ($versi !== null) {
+            $data['pusat_diperbarui'] = $versi;
+        }
         if (! $lama) {
             $data += ['nis' => (string) ($p['nis'] ?? ''), 'nama' => (string) ($p['nama'] ?? '')];
         }
@@ -111,7 +158,7 @@ class PusatSync
         $nama = (string) PusatKlien::baca('tahun_aktif', '');
         Kelas::query()->update(['tahun_aktif' => false]);
         if ($nama !== '') {
-            Kelas::where('tahun_ajaran', $nama)->update(['tahun_aktif' => true]);
+            Kelas::where('tahun_ajaran', $nama)->whereNull('dihapus_pada')->update(['tahun_aktif' => true]);
         }
     }
 }

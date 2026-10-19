@@ -22,6 +22,7 @@ class IntegrasiController extends Controller
             'callback' => route('sso.callback'), 'webhook' => url('/api/pusat/webhook'),
             'terakhir' => $siap ? PusatKlien::baca('sinkron_terakhir') : null,
             'tahun' => $siap ? PusatKlien::baca('tahun_aktif') : null,
+            'perluSinkron' => $siap && PusatKlien::baca('perlu_sinkron') !== null,
             'jumlah' => ['kelas' => $siap ? Kelas::count() : 0, 'siswa' => $siap ? Siswa::aktif()->count() : 0],
             'absensiAktif' => AbsensiKlien::aktif(), 'absensiUrl' => config('bk.absensi.url'),
         ]);

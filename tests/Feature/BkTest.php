@@ -87,6 +87,6 @@ class BkTest extends TestCase
 
     public function test_webhook_tanpa_tanda_tangan_ditolak(): void
     {
-        $this->postJson('/api/pusat/webhook', ['a' => 1])->assertStatus(404);
+        $this->postJson('/api/pusat/webhook', ['a' => 1])->assertStatus(404); // integrasi Pusat mati di lingkungan uji
     }
 }

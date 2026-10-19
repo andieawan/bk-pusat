@@ -39,7 +39,8 @@ class AbsensiKlien
             throw new RuntimeException('Absensi tidak dapat dihubungi. Periksa ABSENSI_URL dan jaringan.');
         }
         if (! $res->successful()) {
-            $pesan = $res->json('error.message') ?: ($res->status() === 401 ? 'Kunci API Absensi salah atau dicabut.' : 'HTTP '.$res->status());
+            $galat = $res->json('error');
+            $pesan = (is_array($galat) ? ($galat['message'] ?? null) : $galat) ?: $res->json('message') ?: ($res->status() === 401 ? 'Kunci API Absensi salah atau dicabut.' : 'HTTP '.$res->status());
             if ($res->status() === 403) {
                 $pesan = 'Kunci API Absensi belum punya izin yang dibutuhkan ('.$pesan.').';
             }

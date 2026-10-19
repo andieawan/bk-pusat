@@ -32,26 +32,34 @@ class PusatWebhookController extends Controller
         if ($id === '' || $event === '') {
             return response()->json(['ok' => false, 'error' => 'header_kurang'], 422);
         }
-        $baru = DB::table('pusat_webhook')->insertOrIgnore(['delivery_id' => $id, 'event' => $event, 'created_at' => now('UTC')->format('Y-m-d H:i:s')]);
+        // Catat nomor kiriman DAN proses dalam satu transaksi: bila proses gagal, catatan ikut batal sehingga
+        // pengiriman ulang dari Pusat diproses lagi (bukan dianggap duplikat lalu hilang).
+        $baru = DB::transaction(function () use ($id, $event, $request) {
+            $baru = DB::table('pusat_webhook')->insertOrIgnore(['delivery_id' => $id, 'event' => $event, 'created_at' => now('UTC')->format('Y-m-d H:i:s')]);
+            if (! $baru) {
+                return false;
+            }
+            $data = (array) $request->json('data', []);
+            if (in_array($event, ['akun.diperbarui', 'akses.diperbarui'], true)) {
+                PusatAkun::cabutBilaPerlu($data);
+            } elseif (isset($data['uuid'])) {
+                if (str_starts_with($event, 'kelas.')) {
+                    PusatSync::upsertKelas($data);
+                    PusatSync::tandaiTahunAktif();
+                } elseif (str_starts_with($event, 'siswa.')) {
+                    PusatSync::upsertSiswa($data);
+                } elseif (str_starts_with($event, 'tahun_ajaran.') && ! empty($data['aktif']) && ! empty($data['nama'])) {
+                    PusatKlien::simpan('tahun_aktif', (string) $data['nama']);
+                    PusatSync::tandaiTahunAktif();
+                }
+            }
+
+            return true;
+        });
         if (! $baru) {
             return response()->json(['ok' => true, 'duplikat' => true]);
         }
         DB::table('pusat_webhook')->where('created_at', '<', now('UTC')->subDays(7)->format('Y-m-d H:i:s'))->delete();
-
-        $data = (array) $request->json('data', []);
-        if (in_array($event, ['akun.diperbarui', 'akses.diperbarui'], true)) {
-            PusatAkun::cabutBilaPerlu($data);
-        } elseif (isset($data['uuid'])) {
-            if (str_starts_with($event, 'kelas.')) {
-                PusatSync::upsertKelas($data);
-                PusatSync::tandaiTahunAktif();
-            } elseif (str_starts_with($event, 'siswa.')) {
-                PusatSync::upsertSiswa($data);
-            } elseif (str_starts_with($event, 'tahun_ajaran.') && ! empty($data['aktif']) && ! empty($data['nama'])) {
-                PusatKlien::simpan('tahun_aktif', (string) $data['nama']);
-                PusatSync::tandaiTahunAktif();
-            }
-        }
 
         return response()->json(['ok' => true]);
     }
