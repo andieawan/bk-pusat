@@ -8,7 +8,7 @@ return [
 
     // Aplikasi Absensi (sumber data kehadiran; BK menulis absensi manual & tautan delegasi lewat API-nya).
     'absensi' => [
-        'url' => rtrim((string) env('ABSENSI_URL', ''), '/'),
+        'url' => (fn (string $u) => $u === '' || preg_match('#^https?://#i', $u) ? $u : 'https://'.$u)(rtrim(trim((string) env('ABSENSI_URL', ''), " \t\"'"), '/')),
         'api_key' => env('ABSENSI_API_KEY', ''),
         'timeout' => (int) env('ABSENSI_TIMEOUT', 15),
         'verify_ssl' => filter_var(env('ABSENSI_VERIFY_SSL', true), FILTER_VALIDATE_BOOLEAN),

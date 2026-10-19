@@ -3,7 +3,7 @@
 // Penyambungan ke aplikasi Pusat Sekolah (login tunggal + data siswa/kelas). Mati bila PUSAT_ENABLED=false.
 return [
     'enabled' => (bool) env('PUSAT_ENABLED', false),
-    'url' => rtrim((string) env('PUSAT_URL', ''), '/'),
+    'url' => (fn (string $u) => $u === '' || preg_match('#^https?://#i', $u) ? $u : 'https://'.$u)(rtrim(trim((string) env('PUSAT_URL', ''), " \t\"'"), '/')),
     'client_id' => env('PUSAT_CLIENT_ID', ''),
     'client_secret' => env('PUSAT_CLIENT_SECRET', ''),
     'webhook_secret' => env('PUSAT_WEBHOOK_SECRET', ''),
