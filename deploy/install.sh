@@ -178,6 +178,12 @@ echo "* * * * * www-data cd $APP_DIR && php artisan schedule:run >> /dev/null 2>
 chmod 644 /etc/cron.d/bk-pusat
 systemctl enable --now cron >/dev/null 2>&1 || true
 
+# Backup harian database + berkas (pukul 01:30), simpan 14 hari di /var/backups/bk-pusat. Tidak menimpa jadwal yang sudah diatur.
+if [ ! -f /etc/cron.d/bk-backup ]; then
+    echo "30 1 * * * root APP_DIR=$APP_DIR bash $APP_DIR/deploy/backup.sh >> /var/log/bk-backup.log 2>&1" > /etc/cron.d/bk-backup
+    chmod 644 /etc/cron.d/bk-backup
+fi
+
 # Pemeriksaan akhir kesiapan
 artisan bk:periksa || true
 
