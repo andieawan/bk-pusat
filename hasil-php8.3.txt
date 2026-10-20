@@ -1,3 +1,10 @@
 PHPUnit 12.5.38 by Sebastian Bergmann and contributors.
 
-Test directory "/home/runner/work/bk-pusat/bk-pusat/tests/Unit" not found
+Runtime:       PHP 8.3.35
+Configuration: /home/runner/work/bk-pusat/bk-pusat/phpunit.xml
+
+..........                                                        10 / 10 (100%)
+
+Time: 00:00.287, Memory: 50.50 MB
+
+OK (10 tests, 34 assertions)
