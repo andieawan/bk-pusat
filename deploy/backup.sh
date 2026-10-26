@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Cadangan harian: dump database + scan surat (storage/app). Jadwalkan lewat cron (lihat docs/PASANG-BK.md).
 set -euo pipefail
-APP_DIR="${APP_DIR:-/var/www/bk-pusat}"
+APP_DIR="${APP_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"  # bawaan: folder tempat skrip ini berada
 TUJUAN="${TUJUAN:-/var/backups/bk-pusat}"
 SIMPAN_HARI="${SIMPAN_HARI:-14}"
 
