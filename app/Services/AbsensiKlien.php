@@ -30,13 +30,13 @@ class AbsensiKlien
     private static function panggil(string $metode, string $path, array $data = []): array
     {
         if (! self::aktif()) {
-            throw new RuntimeException('Sambungan ke Absensi belum diatur (ABSENSI_URL dan ABSENSI_API_KEY di .env).');
+            throw new RuntimeException('Sambungan ke Absensi belum diatur. Nyalakan "Absensi → BK" di Pusat → Administrasi → Sambungan.');
         }
         try {
             $res = $metode === 'get' ? self::http()->get($path, $data) : self::http()->{$metode}($path, $data);
         } catch (\Throwable $e) {
             report($e);
-            throw new RuntimeException('Absensi tidak dapat dihubungi. Periksa ABSENSI_URL dan jaringan.');
+            throw new RuntimeException('Absensi tidak dapat dihubungi. Pastikan aplikasi Absensi menyala dan alamatnya di Pusat → Aplikasi benar.');
         }
         if (! $res->successful()) {
             $galat = $res->json('error');

@@ -40,7 +40,9 @@ class PusatWebhookController extends Controller
                 return false;
             }
             $data = (array) $request->json('data', []);
-            if (in_array($event, ['akun.diperbarui', 'akses.diperbarui'], true)) {
+            if ($event === 'sambungan.diperbarui') {
+                \App\Services\Sambungan::tarik(); // gagal → transaksi batal → Pusat mengirim ulang
+            } elseif (in_array($event, ['akun.diperbarui', 'akses.diperbarui'], true)) {
                 PusatAkun::cabutBilaPerlu($data);
             } elseif (isset($data['uuid'])) {
                 if (str_starts_with($event, 'kelas.')) {

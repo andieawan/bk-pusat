@@ -47,6 +47,6 @@ class PklTest extends TestCase
         config(['bk.pkl' => ['url' => 'https://pkl.test', 'api_key' => 'salah', 'timeout' => 5, 'verify_ssl' => true]]);
         Http::fake(['pkl.test/*' => Http::response(['error' => ['kode' => 'kunci_salah']], 401)]);
         $bk = User::create(['username' => 'bk', 'nama' => 'Bk', 'roles' => ['bk'], 'aktif' => true]);
-        $this->actingAs($bk)->get('/pkl')->assertOk()->assertSee('Kunci API PKL salah');
+        $this->actingAs($bk)->get('/pkl')->assertOk()->assertSee('Kunci API PKL ditolak');
     }
 }

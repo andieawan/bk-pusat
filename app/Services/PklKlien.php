@@ -16,17 +16,17 @@ class PklKlien
     private static function get(string $path): array
     {
         if (! self::aktif()) {
-            throw new RuntimeException('Sambungan ke PKL belum diatur (PKL_URL dan PKL_API_KEY di .env).');
+            throw new RuntimeException('Sambungan ke PKL belum diatur. Nyalakan "PKL → BK" di Pusat → Administrasi → Sambungan.');
         }
         try {
             $res = Http::baseUrl(config('bk.pkl.url').'/api/v1')->withToken((string) config('bk.pkl.api_key'))->acceptJson()
                 ->withOptions(['verify' => (bool) config('bk.pkl.verify_ssl')])->timeout(config('bk.pkl.timeout'))->get($path);
         } catch (\Throwable $e) {
             report($e);
-            throw new RuntimeException('Aplikasi PKL tidak dapat dihubungi. Periksa PKL_URL dan jaringan.');
+            throw new RuntimeException('Aplikasi PKL tidak dapat dihubungi. Pastikan aplikasi PKL menyala dan alamatnya di Pusat → Aplikasi benar.');
         }
         if ($res->status() === 401) {
-            throw new RuntimeException('Kunci API PKL salah (samakan PKL_API_KEY di BK dengan PKL_API_KUNCI_BK di PKL).');
+            throw new RuntimeException('Kunci API PKL ditolak. Di Pusat → Administrasi → Sambungan klik "Kirim ulang" pada PKL → BK (pastikan aplikasi PKL sudah diperbarui).');
         }
         if (! $res->successful()) {
             throw new RuntimeException('PKL membalas HTTP '.$res->status().'.');
