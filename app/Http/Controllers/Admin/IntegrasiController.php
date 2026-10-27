@@ -18,12 +18,16 @@ class IntegrasiController extends Controller
         $siap = PusatKlien::siap();
 
         return view('admin.integrasi', [
-            'pusatAktif' => PusatKlien::aktif(), 'siap' => $siap, 'pusatUrl' => config('pusat.url'),
-            'callback' => route('sso.callback'), 'webhook' => url('/api/pusat/webhook'),
-            'terakhir' => $siap ? PusatKlien::baca('sinkron_terakhir') : null,
-            'tahun' => $siap ? PusatKlien::baca('tahun_aktif') : null,
-            'perluSinkron' => $siap && PusatKlien::baca('perlu_sinkron') !== null,
-            'jumlah' => ['kelas' => $siap ? Kelas::count() : 0, 'siswa' => $siap ? Siswa::aktif()->count() : 0],
+            'p' => [
+                'aktif' => PusatKlien::aktif(), 'siap' => $siap, 'url' => config('pusat.url'),
+                'callback' => route('sso.callback'), 'webhook' => url('/api/pusat/webhook'),
+                'tahun' => $siap ? PusatKlien::baca('tahun_aktif') : null,
+                'terakhir' => $siap ? PusatKlien::baca('sinkron_terakhir') : null,
+                'jumlah' => ['kelas' => $siap ? Kelas::count() : 0, 'siswa aktif' => $siap ? Siswa::aktif()->count() : 0],
+                'perluSinkron' => $siap && PusatKlien::baca('perlu_sinkron') !== null,
+                'otomatis' => (bool) config('pusat.sinkron_otomatis'),
+                'ruteUji' => route('admin.integrasi.pusat'), 'ruteSinkron' => route('admin.integrasi.sinkron'),
+            ],
             'absensiAktif' => AbsensiKlien::aktif(), 'absensiUrl' => config('bk.absensi.url'),
         ]);
     }
