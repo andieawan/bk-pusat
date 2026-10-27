@@ -5,6 +5,6 @@ Configuration: /home/runner/work/bk-pusat/bk-pusat/phpunit.xml
 
 ....................                                              20 / 20 (100%)
 
-Time: 00:01.870, Memory: 58.50 MB
+Time: 00:01.607, Memory: 58.50 MB
 
 OK (20 tests, 105 assertions)
