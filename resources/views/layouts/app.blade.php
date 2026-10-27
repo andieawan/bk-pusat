@@ -36,6 +36,7 @@
         if ($bukaBk) {
             foreach (\App\Support\BkModules::all() as $j => $mod) { $tabs[] = [['catatan', $j], $mod['label'], 'i-folder', null, $j]; }
             if ($me->isCounselor()) { $tabs[] = ['presensi', 'Presensi', 'i-check', 'presensi*']; }
+            if ($me->isCounselor() && \App\Services\PklKlien::aktif()) { $tabs[] = ['pkl', 'PKL', 'i-users', 'pkl*']; }
         }
         if ($me->isAdmin()) { $tabs[] = ['admin.integrasi', 'Integrasi', 'i-gear', 'admin.*']; }
     @endphp
@@ -51,8 +52,7 @@
             <summary aria-label="Menu akun {{ $me->nama }}"><span class="avatar" aria-hidden="true">{{ $initial }}</span><span class="acct-name">{{ $me->nama }}<small>{{ $me->roleLabel() }}</small></span><span class="caret" aria-hidden="true">▾</span></summary>
             <div class="acct-menu" role="menu">
                 <div class="acct-head"><b>{{ $me->nama }}</b><small>{{ '@'.$me->username }} · {{ $me->roleLabel() }}</small></div>
-                @if(config('bk.absensi.url'))<a role="menuitem" href="{{ config('bk.absensi.url') }}">📋 Buka Absensi</a>@endif
-                @if(config('pusat.url'))<a role="menuitem" href="{{ config('pusat.url') }}">🏫 Pusat Sekolah</a>@endif
+                @include('partials.aplikasi-lain')
                 <form method="post" action="{{ route('logout') }}">@csrf<button class="menu-btn danger" role="menuitem">⎋ Keluar</button></form>
             </div>
         </details>

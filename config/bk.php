@@ -15,6 +15,14 @@ return [
         'ca_bundle' => env('ABSENSI_CA_BUNDLE'),
     ],
 
+    // Aplikasi PKL (baca saja): siswa PKL yang perlu perhatian & riwayat PKL per siswa. Kunci = PKL_API_KUNCI_BK di .env PKL.
+    'pkl' => [
+        'url' => (fn (string $u) => $u === '' || preg_match('#^https?://#i', $u) ? $u : 'https://'.$u)(rtrim(trim((string) env('PKL_URL', ''), " \t\"'"), '/')),
+        'api_key' => env('PKL_API_KEY', ''),
+        'timeout' => (int) env('PKL_TIMEOUT', 15),
+        'verify_ssl' => filter_var(env('PKL_VERIFY_SSL', true), FILTER_VALIDATE_BOOLEAN),
+    ],
+
     // Admin lokal darurat (bk:buat-admin). Login normal lewat Pusat.
     'login_lokal' => (bool) env('BK_LOGIN_LOKAL', true),
 

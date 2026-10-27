@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\IntegrasiController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BerandaController;
 use App\Http\Controllers\CatatanController;
+use App\Http\Controllers\PklController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\PusatSsoController;
 use App\Http\Controllers\PusatWebhookController;
@@ -39,6 +40,8 @@ Route::middleware(['auth', 'akun.aktif'])->group(function () {
         Route::post('/presensi/manual', [PresensiController::class, 'manual'])->name('presensi.manual');
         Route::post('/presensi/delegasi', [PresensiController::class, 'delegasi'])->name('presensi.delegasi');
         Route::post('/presensi/delegasi/cabut', [PresensiController::class, 'cabut'])->name('presensi.cabut');
+        Route::get('/pkl', [PklController::class, 'index'])->name('pkl');
+        Route::get('/pkl/siswa/{siswa}', [PklController::class, 'siswa'])->whereNumber('siswa')->name('pkl.siswa');
     });
 
     Route::middleware('bk:admin')->prefix('admin')->name('admin.')->group(function () {
@@ -46,5 +49,6 @@ Route::middleware(['auth', 'akun.aktif'])->group(function () {
         Route::post('/integrasi/uji-pusat', [IntegrasiController::class, 'ujiPusat'])->middleware('throttle:10,1')->name('integrasi.pusat');
         Route::post('/integrasi/sinkron', [IntegrasiController::class, 'sinkron'])->middleware('throttle:5,1')->name('integrasi.sinkron');
         Route::post('/integrasi/uji-absensi', [IntegrasiController::class, 'ujiAbsensi'])->middleware('throttle:10,1')->name('integrasi.absensi');
+        Route::post('/integrasi/uji-pkl', [IntegrasiController::class, 'ujiPkl'])->middleware('throttle:10,1')->name('integrasi.pkl');
     });
 });

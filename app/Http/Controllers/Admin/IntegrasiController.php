@@ -29,6 +29,7 @@ class IntegrasiController extends Controller
                 'ruteUji' => route('admin.integrasi.pusat'), 'ruteSinkron' => route('admin.integrasi.sinkron'),
             ],
             'absensiAktif' => AbsensiKlien::aktif(), 'absensiUrl' => config('bk.absensi.url'),
+            'pklAktif' => \App\Services\PklKlien::aktif(), 'pklUrl' => config('bk.pkl.url'),
         ]);
     }
 
@@ -81,5 +82,16 @@ class IntegrasiController extends Controller
         return $kurang
             ? back()->with('error', 'Terhubung ke Absensi, tetapi kunci API belum punya izin: '.implode(', ', $kurang).'.')
             : back()->with('success', 'Terhubung ke Absensi. Kunci API benar dan izin lengkap.');
+    }
+
+    public function ujiPkl()
+    {
+        try {
+            \App\Services\PklKlien::ping();
+        } catch (\RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', 'Terhubung ke aplikasi PKL. Kunci API benar.');
     }
 }
