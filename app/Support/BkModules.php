@@ -48,7 +48,7 @@ class BkModules
                 'extra' => [
                     'petugas' => ['Petugas', 'text', 'mis. Guru BK & Wali Kelas'],
                     'bertemu' => ['Bertemu dengan', 'text', 'mis. Ibu kandung'],
-                    'alamat' => ['Alamat', 'text', ''],
+                    'alamat' => ['Alamat', 'text', 'kosongkan = alamat dari data siswa'],
                 ],
                 'rahasia' => false, 'berkas' => false, 'wali_tulis' => false,
             ],

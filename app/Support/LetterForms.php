@@ -56,7 +56,7 @@ class LetterForms
         $tglSurat = ['k' => 'tgl', 'label' => 'Tanggal surat', 'v' => $now['long']];
         $id = [
             ['k' => 'ttl', 'label' => 'Tempat, tgl lahir', 'v' => self::ttl($s)],
-            ['k' => 'alamat', 'label' => 'Alamat', 'v' => '', 'wide' => true],
+            ['k' => 'alamat', 'label' => 'Alamat', 'v' => (string) ($s->alamat ?? ''), 'wide' => true],
             ['k' => 'hp', 'label' => 'No. HP orang tua', 'v' => (string) ($s->no_hp_ortu ?? '')],
         ];
         $pelanggaran = ['k' => 'pelanggaran', 'label' => 'Jenis pelanggaran', 'v' => $alpa > 0 ? "Tidak masuk tanpa keterangan (alpa {$alpa} kali)" : '', 'wide' => true];
@@ -81,7 +81,7 @@ class LetterForms
             'berita-acara' => [
                 ['k' => 'tglk', 'label' => 'Tanggal pertemuan (Y-m-d)', 'v' => Dates::today()],
                 ['k' => 'mulai', 'label' => 'Pukul mulai', 'v' => ''], ['k' => 'selesai', 'label' => 's/d pukul', 'v' => ''],
-                ['k' => 'alamat', 'label' => 'Alamat', 'v' => '', 'wide' => true],
+                ['k' => 'alamat', 'label' => 'Alamat', 'v' => (string) ($s->alamat ?? ''), 'wide' => true],
                 ['k' => 'hasil', 'label' => 'Hasil yang diperoleh', 'v' => '', 'wide' => true], $tglSurat,
             ],
             'izin' => [

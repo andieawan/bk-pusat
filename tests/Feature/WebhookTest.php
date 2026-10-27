@@ -61,4 +61,15 @@ class WebhookTest extends TestCase
         $this->kirim('siswa.diperbarui', ['uuid' => 's1', 'nama' => 'B'], 'd1')->assertJson(['duplikat' => true]);
         $this->assertSame('A', Siswa::first()->nama);
     }
+
+    public function test_alamat_dari_pusat_mengisi_surat_dan_home_visit(): void
+    {
+        $this->kirim('siswa.diperbarui', ['uuid' => 's1', 'alamat' => 'Dusun Krajan RT 02, Pakusari', 'diperbarui' => '2026-10-20T02:00:00+07:00'], 'd1')->assertOk();
+        $s = Siswa::first();
+        $this->assertSame('Dusun Krajan RT 02, Pakusari', $s->alamat);
+        $bk = \App\Models\User::create(['username' => 'bk', 'nama' => 'Bu BK', 'roles' => ['bk'], 'aktif' => true]);
+        $this->actingAs($bk)->get('/surat/peringatan/'.$s->id)->assertOk()->assertSee('Dusun Krajan RT 02, Pakusari');
+        $this->actingAs($bk)->post('/catatan/home_visit', ['siswa_id' => $s->id, 'tanggal' => date('Y-m-d'), 'judul' => 'Kunjungan', 'status' => 'Proses'])->assertRedirect();
+        $this->assertSame('Dusun Krajan RT 02, Pakusari', \App\Models\BkCatatan::first()->x('alamat'));
+    }
 }

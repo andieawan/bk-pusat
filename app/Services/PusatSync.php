@@ -108,12 +108,16 @@ class PusatSync
             return 'sama';
         }
         $peta = ['nis' => 'nis', 'nisn' => 'nisn', 'nama' => 'nama', 'jenis_kelamin' => 'jk', 'status' => 'status', 'tempat_lahir' => 'tempat_lahir',
-            'tanggal_lahir' => 'tanggal_lahir', 'no_hp_ortu' => 'no_hp_ortu', 'nama_ortu' => 'nama_ortu'];
+            'tanggal_lahir' => 'tanggal_lahir', 'no_hp_ortu' => 'no_hp_ortu', 'nama_ortu' => 'nama_ortu', 'alamat' => 'alamat'];
         $data = [];
         foreach ($peta as $dari => $ke) { // hanya kolom yang dikirim (cakupan "dasar" tidak memuat data pribadi): jangan menimpa dengan null
             if (array_key_exists($dari, $p)) {
                 $data[$ke] = $p[$dari];
             }
+        }
+        static $adaAlamat = null;
+        if (array_key_exists('alamat', $data) && ! ($adaAlamat ??= \Illuminate\Support\Facades\Schema::hasColumn('siswa', 'alamat'))) {
+            unset($data['alamat']); // database belum diperbarui (migrate)
         }
         if (array_key_exists('kelas_uuid', $p)) {
             $kelasId = $p['kelas_uuid'] ? Kelas::where('pusat_uuid', $p['kelas_uuid'])->value('id') : null;

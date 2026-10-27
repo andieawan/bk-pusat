@@ -95,6 +95,9 @@ class BkService
             }
             $extra[$key] = mb_substr($v, 0, 191);
         }
+        if (array_key_exists('alamat', $extra) && $extra['alamat'] === '' && ! empty($siswa->alamat)) {
+            $extra['alamat'] = mb_substr((string) $siswa->alamat, 0, 191); // home visit: alamat dari Pusat bila tidak diisi
+        }
         $data = [
             'jenis' => $jenis, 'siswa_id' => $siswa->id, 'kelas_id' => $kelasId, 'tanggal' => $tanggal, 'kategori' => $kategori,
             'judul' => mb_substr($judul, 0, 191), 'uraian' => trim((string) ($in['uraian'] ?? '')) ?: null,
