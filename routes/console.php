@@ -12,3 +12,12 @@ Schedule::command('bk:sinkron')->hourly()->withoutOverlapping(30)->when(function
         return false;
     }
 });
+// Belum pernah sinkron (baru dipasang): sinkron pertama berjalan otomatis tiap 15 menit sampai berhasil,
+// agar daftar kelas/siswa/guru tidak kosong walau admin lupa menekan "Sinkron sekarang".
+Schedule::command('bk:sinkron')->everyFifteenMinutes()->withoutOverlapping(30)->when(function () {
+    try {
+        return \App\Services\PusatKlien::aktif() && \App\Services\PusatKlien::siap() && \App\Services\PusatKlien::baca('sinkron_terakhir') === null;
+    } catch (\Throwable) {
+        return false;
+    }
+});
