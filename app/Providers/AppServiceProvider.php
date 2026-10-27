@@ -21,6 +21,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Sambungan antar-aplikasi dari Pusat (Administrasi → Sambungan) menimpa nilai .env.
         \App\Services\Sambungan::terapkan();
+        \App\Services\ProfilPusat::terapkan(); // kop surat & kepala sekolah dari Profil Sekolah di Pusat
 
         // Proxy tepercaya dari config (lihat config/app.php: trusted_proxies).
         if ($proxi = trim((string) config('app.trusted_proxies'))) {

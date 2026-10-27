@@ -17,6 +17,7 @@ class PusatSync
     public function jalankan(): array
     {
         Sambungan::tarikAman(); // sambungan antar-aplikasi ikut diperbarui setiap sinkron
+        ProfilPusat::tarikAman(); // profil sekolah (kop surat, kepala sekolah, logo)
         $tahun = PusatKlien::semua('tahun-ajaran');
         $kelas = PusatKlien::semua('kelas');
         $siswa = PusatKlien::semua('siswa');

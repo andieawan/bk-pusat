@@ -1,6 +1,6 @@
 @php($c = $cfg ?? config('bk.surat'))
 <header class="kop2">
-    <img src="{{ asset('assets/logo-ibu.png') }}" alt="" width="84" height="84">
+    <img src="{{ route('logo.sekolah') }}" alt="" width="84" height="84">
     <div>
         <div class="k1">{{ $c['yayasan'] }}</div>
         <div class="k1">{{ $c['yayasan2'] }}</div>

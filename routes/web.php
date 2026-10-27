@@ -11,6 +11,8 @@ use App\Http\Controllers\PusatWebhookController;
 use App\Http\Controllers\SuratController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/logo-sekolah', \App\Http\Controllers\LogoController::class)->middleware('throttle:120,1')->name('logo.sekolah');
+
 // Penerima webhook dari Pusat Sekolah (tanda tangan HMAC; tanpa CSRF — lihat bootstrap/app.php).
 Route::post('/api/pusat/webhook', PusatWebhookController::class)->middleware('throttle:120,1');
 
