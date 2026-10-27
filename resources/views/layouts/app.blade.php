@@ -7,12 +7,12 @@
     <title>{{ $title ?? 'BK' }} · {{ config('bk.school_name') }}</title>
     <script>document.documentElement.classList.add('js')</script>
     <link rel="stylesheet" href="{{ asset('assets/app.css') }}?v={{ @filemtime(public_path('assets/app.css')) }}">
-    <meta name="theme-color" content="#4f46e5">
+    <meta name="theme-color" content="#be185d">
     <link rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('icons/icon-192.png') }}">
     @stack('head')
 </head>
-<body @class(['bare' => $bare ?? false])>
+<body data-app="bk" @class(['bare' => $bare ?? false])>
 <a class="skip" href="#isi">Lompat ke isi halaman</a>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
