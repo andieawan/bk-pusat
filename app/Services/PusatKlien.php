@@ -22,6 +22,16 @@ class PusatKlien
         return Schema::hasColumn('users', 'pusat_uuid') && Schema::hasTable('pusat_state');
     }
 
+    /** Cek cepat Pusat hidup (dipakai sebelum mengarahkan ke login Pusat). */
+    public static function hidup(): bool
+    {
+        try {
+            return self::http()->timeout(4)->connectTimeout(3)->get('/api/v1/ping')->successful();
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
     public static function http(): PendingRequest
     {
         return Http::baseUrl(config('pusat.url'))
