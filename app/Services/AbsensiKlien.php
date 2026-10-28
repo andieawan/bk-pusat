@@ -68,6 +68,18 @@ class AbsensiKlien
         ])['data'] ?? [];
     }
 
+    /** Status absensi harian tiap siswa satu kelas pada satu tanggal. @return array<int,array{siswa_uuid:?string,status:?string,catatan:?string}> */
+    public static function harianKelas(string $kelasUuid, string $tanggal): array
+    {
+        return self::panggil('get', '/kehadiran/harian-kelas', ['kelas_uuid' => $kelasUuid, 'tanggal' => $tanggal])['data'] ?? [];
+    }
+
+    /** Absensi harian banyak siswa satu kelas sekaligus. @param array<int,array{siswa_uuid:string,status:string,catatan:?string}> $entri */
+    public static function manualKelas(string $kelasUuid, string $tanggal, array $entri, string $petugas): array
+    {
+        return self::panggil('post', '/kehadiran/manual/kelas', ['kelas_uuid' => $kelasUuid, 'tanggal' => $tanggal, 'entri' => $entri, 'petugas' => $petugas])['data'] ?? [];
+    }
+
     /** @return array<int,array{token:string,tautan:string,berlaku_sampai:?string}> */
     public static function delegasi(string $kelasUuid): array
     {

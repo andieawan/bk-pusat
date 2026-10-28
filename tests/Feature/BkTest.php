@@ -89,4 +89,38 @@ class BkTest extends TestCase
     {
         $this->postJson('/api/pusat/webhook', ['a' => 1])->assertStatus(404); // integrasi Pusat mati di lingkungan uji
     }
+
+    public function test_bk_mengisi_absensi_satu_kelas_sekaligus(): void
+    {
+        config(['bk.absensi.url' => 'https://abs.test', 'bk.absensi.api_key' => 'ak_x']);
+        [$s1, $s2] = $this->data();
+        $s3 = Siswa::create(['pusat_uuid' => 's3', 'nis' => '1003', 'nama' => 'Citra', 'jk' => 'P', 'kelas_id' => $s1->kelas_id, 'status' => 'aktif']);
+        $terkirim = null;
+        \Illuminate\Support\Facades\Http::fake(function ($r) use (&$terkirim) {
+            $path = parse_url($r->url(), PHP_URL_PATH);
+            if (str_ends_with($path, '/kehadiran/harian-kelas')) {
+                return \Illuminate\Support\Facades\Http::response(['data' => [
+                    ['siswa_uuid' => 's1', 'status' => 'S', 'catatan' => 'Demam'], ['siswa_uuid' => 's3', 'status' => null, 'catatan' => null],
+                ]]);
+            }
+            if (str_ends_with($path, '/kehadiran/manual/kelas')) {
+                $terkirim = $r->data();
+
+                return \Illuminate\Support\Facades\Http::response(['data' => ['dibuat' => 1, 'diperbarui' => 1]]);
+            }
+
+            return \Illuminate\Support\Facades\Http::response(['data' => []]);
+        });
+        $bk = $this->user('bk', ['bk']);
+        $this->actingAs($bk)->get('/presensi?kelas='.$s1->kelas_id)->assertOk()->assertSee('Absensi Harian')->assertSee('Citra')->assertSee('belum diisi');
+
+        $hari = \App\Support\Dates::today();
+        $this->post('/presensi/kelas', ['kelas' => $s1->kelas_id, 'tanggal' => $hari,
+            'status' => [$s1->id => 'S', $s3->id => 'A'], 'catatan' => [$s1->id => 'Demam', $s3->id => ''],
+            'lama' => [$s1->id => 'S', $s3->id => ''], 'lama_catatan' => [$s1->id => 'Demam', $s3->id => '']])
+            ->assertRedirect()->assertSessionHas('success');
+        // Budi tidak berubah → tidak dikirim; Citra baru → dikirim
+        $this->assertSame([['siswa_uuid' => 's3', 'status' => 'A', 'catatan' => null]], $terkirim['entri']);
+        $this->actingAs($this->user('wali2', ['guru'], 'p-wali'))->post('/presensi/kelas', ['kelas' => $s1->kelas_id, 'tanggal' => $hari, 'status' => [$s1->id => 'A']])->assertForbidden();
+    }
 }

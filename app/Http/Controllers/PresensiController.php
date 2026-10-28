@@ -11,7 +11,7 @@ use App\Support\Dates;
 use Illuminate\Http\Request;
 
 /**
- * Presensi BK: rekap ketidakhadiran per kelas (dibaca dari Absensi), input absensi manual dan tautan
+ * Presensi BK: rekap ketidakhadiran per kelas (dibaca dari Absensi), absensi harian satu kelas sekaligus dan tautan
  * delegasi Ketua Kelas (ditulis ke Absensi lewat API). Khusus Guru BK/Admin.
  */
 class PresensiController extends Controller
@@ -25,14 +25,17 @@ class PresensiController extends Controller
         $dari = Dates::valid($request->query('dari')) ? $request->query('dari') : date('Y-m-d', (int) Dates::parse($hari) - 29 * 86400);
         $sampai = Dates::valid($request->query('sampai')) ? $request->query('sampai') : $hari;
 
+        $tanggal = Dates::valid($request->query('tanggal')) && $request->query('tanggal') <= $hari ? $request->query('tanggal') : $hari;
         $rekap = null;
         $galat = null;
         $tautan = [];
+        $harian = null; // uuid siswa => [status, catatan] dari Absensi; null = tidak bisa dibaca
         if ($k && AbsensiKlien::aktif()) {
             try {
                 $rekap = collect(AbsensiKlien::ringkasan((string) $k->pusat_uuid, $dari, $sampai));
                 $rekap = $rekap->map(fn ($r) => $r + ['absen' => $r['izin'] + $r['sakit'] + $r['alpa']])->sortByDesc('absen')->values();
                 $tautan = AbsensiKlien::delegasi((string) $k->pusat_uuid);
+                $harian = collect(AbsensiKlien::harianKelas((string) $k->pusat_uuid, $tanggal))->keyBy('siswa_uuid');
             } catch (\RuntimeException $e) {
                 $galat = $e->getMessage();
             }
@@ -45,25 +48,48 @@ class PresensiController extends Controller
         return view('presensi.index', [
             'kelas' => $kelas, 'k' => $k, 'rekap' => $rekap, 'galat' => $galat, 'tautan' => $tautan, 'siswa' => $siswa,
             'peta' => $uuidSiswa, 'dari' => $dari, 'sampai' => $sampai, 'hari' => $hari, 'batas' => config('bk.batas_alpa'),
+            'tanggal' => $tanggal, 'harian' => $harian,
             'tokenBaru' => session('token_baru'),
         ]);
     }
 
-    public function manual(Request $request)
+    /** Absensi harian satu kelas sekaligus (ditulis ke Absensi). Hanya baris yang baru/berubah yang dikirim. */
+    public function kelas(Request $request)
     {
         $d = $request->validate([
-            'siswa' => 'required|integer|exists:siswa,id', 'status' => 'required|in:H,I,S,A',
-            'tanggal' => 'required|date_format:Y-m-d|before_or_equal:today', 'catatan' => 'nullable|string|max:200',
-        ], [], ['siswa' => 'siswa']);
-        $s = Siswa::findOrFail($d['siswa']);
+            'kelas' => 'required|integer|exists:kelas,id', 'tanggal' => 'required|date_format:Y-m-d|before_or_equal:today',
+            'status' => 'required|array', 'status.*' => 'required|in:H,I,S,A',
+            'catatan' => 'nullable|array', 'catatan.*' => 'nullable|string|max:200',
+            'lama' => 'nullable|array', 'lama_catatan' => 'nullable|array',
+        ]);
+        $k = Kelas::findOrFail($d['kelas']);
+        $siswa = Siswa::aktif()->where('kelas_id', $k->id)->whereIn('id', array_keys($d['status']))->get()->keyBy('id');
+        $entri = [];
+        foreach ($d['status'] as $id => $st) {
+            $s = $siswa[(int) $id] ?? null;
+            if (! $s) {
+                continue;
+            }
+            $cat = trim((string) ($d['catatan'][$id] ?? ''));
+            $lama = (string) ($d['lama'][$id] ?? '');
+            if ($lama !== '' && $lama === $st && $cat === trim((string) ($d['lama_catatan'][$id] ?? ''))) {
+                continue; // tidak berubah: tidak menimpa catatan/pencatat di Absensi
+            }
+            $entri[] = ['siswa_uuid' => $s->pusat_uuid, 'status' => $st, 'catatan' => $cat !== '' ? $cat : null];
+        }
+        $balik = redirect()->route('presensi', ['kelas' => $k->id, 'tanggal' => $d['tanggal']]);
+        if (! $entri) {
+            return $balik->with('success', 'Tidak ada perubahan untuk disimpan.');
+        }
         try {
-            $r = AbsensiKlien::manual($s->pusat_uuid, $d['tanggal'], $d['status'], $d['catatan'] ?? null, $this->me()->nama);
+            $r = AbsensiKlien::manualKelas((string) $k->pusat_uuid, $d['tanggal'], $entri, $this->me()->nama);
         } catch (\RuntimeException $e) {
             return back()->withInput()->with('error', 'Gagal menyimpan ke Absensi: '.$e->getMessage());
         }
-        Audit::catat('Absensi manual BK', $this->me()->nama, "{$s->nama} {$d['tanggal']} = {$d['status']}");
+        Audit::catat('Absensi kelas BK', $this->me()->nama, "{$k->nama} {$d['tanggal']}: ".count($entri).' siswa');
 
-        return redirect()->route('presensi', ['kelas' => $s->kelas_id])->with('success', "Absensi manual untuk {$s->nama} tersimpan di Absensi (".(($r['dibuat'] ?? 0) ? 'baru' : 'diperbarui').').');
+        return $balik->with('success', "Absensi {$k->nama} tanggal ".Dates::human($d['tanggal']).' tersimpan di Absensi ('
+            .(int) ($r['dibuat'] ?? 0).' baru, '.(int) ($r['diperbarui'] ?? 0).' diubah).');
     }
 
     public function delegasi(Request $request)

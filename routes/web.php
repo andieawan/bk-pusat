@@ -39,7 +39,7 @@ Route::middleware(['auth', 'akun.aktif'])->group(function () {
 
     Route::middleware('bk:konselor')->group(function () {
         Route::get('/presensi', [PresensiController::class, 'index'])->name('presensi');
-        Route::post('/presensi/manual', [PresensiController::class, 'manual'])->name('presensi.manual');
+        Route::post('/presensi/kelas', [PresensiController::class, 'kelas'])->name('presensi.kelas');
         Route::post('/presensi/delegasi', [PresensiController::class, 'delegasi'])->name('presensi.delegasi');
         Route::post('/presensi/delegasi/cabut', [PresensiController::class, 'cabut'])->name('presensi.cabut');
         Route::get('/pkl', [PklController::class, 'index'])->name('pkl');
