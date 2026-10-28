@@ -1,19 +1,20 @@
 @extends('layouts.app', ['title' => 'Masuk', 'bare' => true])
 @section('content')
+@php($pusat = \App\Services\PusatKlien::aktif())
 <div class="card login">
-    <img class="logo-login" src="{{ asset('icons/icon-192.png') }}" alt="" width="56" height="56">
+    <img class="logo-login" src="{{ asset('icons/icon-192.png') }}?v={{ @filemtime(public_path('icons/icon-192.png')) }}" alt="" width="56" height="56">
     <h1>Bimbingan Konseling</h1>
-    <p class="mut">{{ config('bk.school_name') }}<br>Masuk memakai akun Pusat Sekolah.</p>
-    @if(\App\Services\PusatKlien::aktif())<a class="btn btn-pri" style="width:100%;text-align:center;display:block" href="{{ route('sso.login') }}">Masuk lewat Pusat</a>@endif
+    <p class="mut">{{ config('bk.school_name') }}<br>Masuk dengan akun Pusat Sekolah.</p>
+    @if($pusat)<a class="btn btn-pri btn-blok" href="{{ route('sso.login') }}">Masuk lewat Pusat</a>@endif
     @if(config('bk.login_lokal'))
-    <details style="margin-top:14px" @if($errors->any()) open @endif><summary class="mut" style="cursor:pointer">Masuk dengan username &amp; password</summary>
-    <p class="mut" style="font-size:13px;margin:8px 0 0">Akun Pusat memakai password Pusat — tetap bisa dipakai saat Pusat sedang tidak bisa dihubungi. Akun yang belum mengganti password awal masuk dulu lewat Pusat.</p>
-    <form method="post" action="{{ route('login') }}" autocomplete="off" style="margin-top:10px">
-        @csrf
-        <div class="field"><label for="u">Username</label><input id="u" type="text" name="username" value="{{ old('username') }}" autocapitalize="none" autocomplete="username" required></div>
-        <div class="field"><label for="pw">Password</label><input id="pw" type="password" name="password" autocomplete="current-password" required></div>
-        <button class="btn" style="width:100%" data-busy="Memeriksa…">Masuk</button>
-    </form></details>
+        @if($pusat)<div class="login-atau"><span>atau dengan username &amp; password</span></div>@endif
+        <form method="post" action="{{ route('login') }}" autocomplete="off">
+            @csrf
+            <div class="field"><label for="u">Username</label><input id="u" type="text" name="username" value="{{ old('username') }}" autocapitalize="none" autocomplete="username" required @unless($pusat) autofocus @endunless></div>
+            <div class="field"><label for="pw">Password</label><div class="pw-wrap"><input id="pw" type="password" name="password" autocomplete="current-password" required><button type="button" class="pw-eye" data-toggle-pw="#pw" aria-label="Tampilkan password" aria-pressed="false">Lihat</button></div></div>
+            <button @class(['btn', 'btn-blok', 'btn-pri' => ! $pusat]) data-busy="Memeriksa…">Masuk</button>
+        </form>
+        @if($pusat)<p class="login-catatan">Akun Pusat memakai password Pusat, jadi tetap bisa masuk saat Pusat sedang tidak bisa dihubungi. Akun baru: masuk lewat Pusat dulu untuk mengganti password awal.</p>@endif
     @endif
 </div>
 @endsection

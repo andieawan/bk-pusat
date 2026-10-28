@@ -8,8 +8,8 @@
     <script>document.documentElement.classList.add('js')</script>
     <link rel="stylesheet" href="{{ asset('assets/app.css') }}?v={{ @filemtime(public_path('assets/app.css')) }}">
     <meta name="theme-color" content="#be185d">
-    <link rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon.png') }}">
-    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('icons/icon-192.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon.png') }}?v={{ @filemtime(public_path('icons/apple-touch-icon.png')) }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('icons/icon-192.png') }}?v={{ @filemtime(public_path('icons/icon-192.png')) }}">
     @stack('head')
 </head>
 <body data-app="bk" @class(['bare' => $bare ?? false])>
@@ -41,7 +41,7 @@
         if ($me->isAdmin()) { $tabs[] = ['admin.integrasi', 'Integrasi', 'i-gear', 'admin.*']; }
     @endphp
     <header class="nav"><div class="nav-in">
-        <a class="brand" href="{{ route('beranda') }}"><img class="logo-img" src="{{ asset('icons/icon-192.png') }}" alt="" width="36" height="36"><span><b>Bimbingan Konseling</b><small>{{ config('bk.school_name') }}</small></span></a>
+        <a class="brand" href="{{ route('beranda') }}"><img class="logo-img" src="{{ asset('icons/icon-192.png') }}?v={{ @filemtime(public_path('icons/icon-192.png')) }}" alt="" width="36" height="36"><span><b>Bimbingan Konseling</b><small>{{ config('bk.school_name') }}</small></span></a>
         <nav class="tabs" aria-label="Menu utama">
             @foreach($tabs as $t)
                 @php($aktif = isset($t[4]) ? (request()->routeIs('catatan*') && request()->route('jenis') === $t[4]) : request()->routeIs($t[3]))
