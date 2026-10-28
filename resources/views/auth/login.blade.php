@@ -6,7 +6,8 @@
     <p class="mut">{{ config('bk.school_name') }}<br>Masuk memakai akun Pusat Sekolah.</p>
     @if(\App\Services\PusatKlien::aktif())<a class="btn btn-pri" style="width:100%;text-align:center;display:block" href="{{ route('sso.login') }}">Masuk lewat Pusat</a>@endif
     @if(config('bk.login_lokal'))
-    <details style="margin-top:14px" @if($errors->any()) open @endif><summary class="mut" style="cursor:pointer">Admin lokal (darurat)</summary>
+    <details style="margin-top:14px" @if($errors->any()) open @endif><summary class="mut" style="cursor:pointer">Masuk dengan username &amp; password</summary>
+    <p class="mut" style="font-size:13px;margin:8px 0 0">Akun Pusat memakai password Pusat — tetap bisa dipakai saat Pusat sedang tidak bisa dihubungi. Akun yang belum mengganti password awal masuk dulu lewat Pusat.</p>
     <form method="post" action="{{ route('login') }}" autocomplete="off" style="margin-top:10px">
         @csrf
         <div class="field"><label for="u">Username</label><input id="u" type="text" name="username" value="{{ old('username') }}" autocapitalize="none" autocomplete="username" required></div>

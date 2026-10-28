@@ -101,4 +101,76 @@ class PusatAkun
 
         return true;
     }
+
+    /**
+     * Login cadangan: simpan salinan hash password dari Pusat (izin "akun_sandi") dan selaraskan username,
+     * agar akun Pusat tetap bisa masuk lewat login lokal saat Pusat tidak bisa dihubungi.
+     * null = akun masih wajib ganti password awal → login lokal ditutup sampai password diganti di Pusat.
+     */
+    public static function terapkanSandi(array $data): void
+    {
+        if (empty($data['uuid']) || ! \Illuminate\Support\Facades\Schema::hasColumn('users', 'password_pusat')) {
+            return;
+        }
+        $user = User::where('pusat_uuid', (string) $data['uuid'])->first();
+        if (! $user) {
+            return;
+        }
+        $ubah = [];
+        if (array_key_exists('password_hash', $data)) {
+            $h = is_string($data['password_hash']) && str_starts_with($data['password_hash'], '$') ? $data['password_hash'] : null;
+            if ($user->password_pusat !== $h) {
+                $ubah['password_pusat'] = $h;
+            }
+        }
+        $username = strtolower(trim((string) ($data['username'] ?? '')));
+        if ($username !== '' && $username !== strtolower((string) $user->username)
+            && ! User::whereRaw('LOWER(username) = ?', [$username])->where('id', '!=', $user->id)->exists()) {
+            $ubah['username'] = $username;
+        }
+        if ($ubah) {
+            $user->forceFill($ubah)->save();
+        }
+    }
+
+    /** Cocokkan password dengan salinan dari Pusat (login cadangan). */
+    public static function cocokSandiPusat(?User $user, string $plain): bool
+    {
+        $h = $user && $user->pusat_uuid ? (string) ($user->password_pusat ?? '') : '';
+        if ($h === '') {
+            return false;
+        }
+        try {
+            return password_verify($plain, $h);
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
+    /**
+     * Sinkron penuh: akun yang diberi peran di aplikasi ini (Pusat → Akun) dibuat/ditautkan di sini tanpa menunggu
+     * login pertama, beserta salinan hash password untuk login cadangan.
+     *
+     * @return array{baru:int, ubah:int}
+     */
+    public static function sinkronDaftar(array $daftar): array
+    {
+        $h = ['baru' => 0, 'ubah' => 0];
+        foreach ($daftar as $a) {
+            if (empty($a['aktif']) || empty($a['uuid']) || ! self::petakanPeran((array) ($a['peran'] ?? []))) {
+                continue;
+            }
+            $lama = User::where('pusat_uuid', $a['uuid'])->first();
+            [$u] = self::masuk([
+                'sub' => $a['uuid'], 'username' => $a['username'] ?? '', 'nama' => $a['nama'] ?? null, 'email' => $a['email'] ?? null,
+                'peran' => $a['peran'] ?? [], 'pegawai' => ['uuid' => $a['pegawai_uuid'] ?? null], 'siswa' => ['uuid' => $a['siswa_uuid'] ?? null],
+            ]);
+            if ($u) {
+                self::terapkanSandi($a);
+                $lama ? null : ($u->wasRecentlyCreated ? $h['baru']++ : $h['ubah']++);
+            }
+        }
+
+        return $h;
+    }
 }

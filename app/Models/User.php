@@ -8,7 +8,7 @@ class User extends Authenticatable
 {
     protected $guarded = [];
 
-    protected $hidden = ['password', 'remember_token'];
+    protected $hidden = ['password', 'password_pusat', 'remember_token'];
 
     private ?array $waliCache = null;
 

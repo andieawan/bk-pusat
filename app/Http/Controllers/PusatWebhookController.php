@@ -46,6 +46,7 @@ class PusatWebhookController extends Controller
                 \App\Services\ProfilPusat::tarik();
             } elseif (in_array($event, ['akun.diperbarui', 'akses.diperbarui'], true)) {
                 PusatAkun::cabutBilaPerlu($data);
+                PusatAkun::terapkanSandi($data); // login cadangan
             } elseif (isset($data['uuid'])) {
                 if (str_starts_with($event, 'kelas.')) {
                     PusatSync::upsertKelas($data);

@@ -30,7 +30,8 @@ class AuthController extends Controller
         }
         $user = User::where('username', $username)->first();
         // Hash::check selalu dijalankan (waktu respons seragam); akun tanpa password (akun Pusat) tidak bisa masuk di sini.
-        $ok = Hash::check($data['password'], $user?->password ?: Hash::make(bin2hex(random_bytes(8)))) && $user && $user->password && $user->aktif;
+        $lokal = Hash::check($data['password'], $user?->password ?: Hash::make(bin2hex(random_bytes(8)))) && $user && $user->password;
+        $ok = ($lokal || \App\Services\PusatAkun::cocokSandiPusat($user, $data['password'])) && $user && $user->aktif; // akun Pusat: login cadangan
         if (! $ok) {
             RateLimiter::hit($key, 15 * 60);
             throw ValidationException::withMessages(['username' => 'Username atau password salah, atau akun nonaktif.']);

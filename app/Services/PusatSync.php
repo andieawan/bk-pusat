@@ -21,6 +21,11 @@ class PusatSync
         $tahun = PusatKlien::semua('tahun-ajaran');
         $kelas = PusatKlien::semua('kelas');
         $siswa = PusatKlien::semua('siswa');
+        try {
+            $akun = PusatKlien::semua('akun', '/api/v1/akun');
+        } catch (RuntimeException $e) {
+            $akun = []; // izin "akun" tidak ada → akun dibuat saat login pertama lewat Pusat
+        }
 
         $aktif = collect($tahun)->firstWhere('aktif', true);
         if (! $aktif) {
@@ -31,7 +36,7 @@ class PusatSync
             throw new RuntimeException('Pusat mengembalikan 0 siswa padahal BK sudah punya '.$tertaut.' siswa. Dibatalkan demi keamanan.');
         }
 
-        return DB::transaction(function () use ($aktif, $kelas, $siswa) {
+        return DB::transaction(function () use ($akun, $aktif, $kelas, $siswa) {
             PusatKlien::simpan('tahun_aktif', $aktif['nama']);
             $h = ['kelas' => ['baru' => 0, 'ubah' => 0, 'sama' => 0], 'siswa' => ['baru' => 0, 'ubah' => 0, 'sama' => 0, 'keluar' => 0], 'tahun_aktif' => $aktif['nama']];
             $adaKelas = [];
@@ -58,6 +63,8 @@ class PusatSync
             }
             PusatKlien::simpan('sinkron_terakhir', now('UTC')->format('Y-m-d H:i:s'));
             PusatKlien::hapus('perlu_sinkron');
+
+            $h['akun'] = PusatAkun::sinkronDaftar($akun);
 
             return $h;
         });
