@@ -1,6 +1,6 @@
 @extends('layouts.app', ['title' => 'Presensi BK'])
 @section('content')
-<div class="head"><div><h1>Presensi BK</h1><small>Absensi harian per kelas, tautan ketua kelas, dan rekap ketidakhadiran — semuanya tersimpan di aplikasi Absensi.</small></div></div>
+<div class="head"><div><h1>Presensi BK</h1><small>Absensi harian per kelas, tautan ketua kelas, dan rekap ketidakhadiran — semuanya tersimpan di aplikasi Jurnal Guru.</small></div></div>
 @if($galat)<div class="alert alert-error"><span class="alert-txt">{{ $galat }}</span></div>@endif
 <form method="get" action="{{ route('presensi') }}" class="card">
     <div class="fields">

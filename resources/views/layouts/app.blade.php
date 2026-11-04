@@ -7,7 +7,7 @@
     <title>{{ $title ?? 'BK' }} · {{ config('bk.school_name') }}</title>
     <script>document.documentElement.classList.add('js')</script>
     <link rel="stylesheet" href="{{ asset('assets/app.css') }}?v={{ @filemtime(public_path('assets/app.css')) }}">
-    <meta name="theme-color" content="#be185d">
+    <meta name="theme-color" content="#143f2a">
     <link rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon.png') }}?v={{ @filemtime(public_path('icons/apple-touch-icon.png')) }}">
     <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('icons/icon-192.png') }}?v={{ @filemtime(public_path('icons/icon-192.png')) }}">
     @stack('head')
