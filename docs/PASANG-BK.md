@@ -3,9 +3,12 @@
 Aplikasi BK berdiri sendiri (1 aplikasi = 1 VM), login lewat **Pusat Sekolah**, dan membaca/menulis kehadiran ke **Absensi** lewat API.
 
 ## 1. VM baru
+Sama seperti TU dan PKL. Repo private: ambil dengan token GitHub, lalu jalankan installer.
 ```bash
-curl -fsSL https://raw.githubusercontent.com/andieawan/bk-pusat/main/deploy/install.sh -o install.sh
-sudo DOMAIN=bk.smkibupakusari.sch.id APP_URL=https://bk.smkibupakusari.sch.id PROXY_IP=192.168.10.10 bash install.sh
+sudo git config --global credential.helper store
+sudo git clone https://github.com/andieawan/bk-pusat.git /var/www/bk-pusat
+cd /var/www/bk-pusat
+sudo DOMAIN=bk.smkibupakusari.sch.id APP_URL=https://bk.smkibupakusari.sch.id PROXY_IP=192.168.10.10 bash deploy/install.sh
 ```
 Lalu di NPMplus buat Proxy Host `bk.smkibupakusari.sch.id` → IP VM, port 80, SSL Let's Encrypt, Force SSL (sama seperti Pusat/Absensi), dan DNS Cloudflare.
 
