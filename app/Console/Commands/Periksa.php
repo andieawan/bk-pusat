@@ -115,16 +115,16 @@ class Periksa extends Command
 
 
         $this->newLine();
-        $this->line('<options=bold>Sambungan ke Absensi</>');
+        $this->line('<options=bold>Sambungan ke Jurnal Guru</>');
         if (! \App\Services\AbsensiKlien::aktif()) {
-            $this->peringatkan('ABSENSI_URL / ABSENSI_API_KEY belum diisi', 'Menu Presensi BK & rekap alpa butuh ini. Buat kunci API di Absensi: Admin → Integrasi API (izin kehadiran:baca + kehadiran:tulis)');
+            $this->peringatkan('Sambungan ke Jurnal Guru belum aktif', 'Menu Presensi BK & rekap alpa butuh ini. Di Pusat → Administrasi → Sambungan, nyalakan "Jurnal Guru → BK", lalu Sinkron di BK');
         } elseif (! $this->option('cepat')) {
             try {
                 $izin = (array) (\App\Services\AbsensiKlien::ping()['scopes'] ?? []);
                 $kurang = array_values(array_diff(['kehadiran:baca', 'kehadiran:tulis'], $izin));
-                $kurang ? $this->gagalkan('Kunci API Absensi kurang izin: '.implode(', ', $kurang), 'Ubah izin kunci di Absensi → Admin → Integrasi API') : $this->ok('Absensi menjawab, kunci API & izin lengkap');
+                $kurang ? $this->gagalkan('Kunci API Jurnal Guru kurang izin: '.implode(', ', $kurang), 'Di Pusat → Administrasi → Sambungan, klik Kirim ulang pada "Jurnal Guru → BK"') : $this->ok('Jurnal Guru menjawab, kunci API & izin lengkap');
             } catch (\Throwable $e) {
-                $this->gagalkan('Absensi: '.mb_substr($e->getMessage(), 0, 140), 'Periksa ABSENSI_URL & ABSENSI_API_KEY');
+                $this->gagalkan('Jurnal Guru: '.mb_substr($e->getMessage(), 0, 140), 'Periksa sambungan "Jurnal Guru → BK" di Pusat dan pastikan Jurnal menyala');
             }
         }
         if (! $this->option('cepat')) {

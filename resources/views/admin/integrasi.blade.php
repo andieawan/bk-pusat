@@ -1,14 +1,14 @@
 @extends('layouts.app', ['title' => 'Integrasi'])
 @section('content')
-<div class="head"><div><h1>Integrasi</h1><small>Sambungan ke Pusat Sekolah (akun & data induk) dan Absensi (kehadiran).</small></div></div>
+<div class="head"><div><h1>Integrasi</h1><small>Sambungan ke Pusat Sekolah (akun & data induk) dan Jurnal Guru (kehadiran).</small></div></div>
 @include('admin._pusat')
-<div class="card"><h2>Absensi</h2>
-    <p style="margin:6px 0 10px">Status: @if($absensiAktif)<span class="badge b-ok">Tersambung</span>@else<span class="badge b-warn">Belum tersambung — klik Sambungkan pada "Absensi → BK" di Pusat → Administrasi → Sambungan</span>@endif</p>
+<div class="card"><h2>Jurnal Guru</h2>
+    <p style="margin:6px 0 10px">Status: @if($absensiAktif)<span class="badge b-ok">Tersambung</span>@else<span class="badge b-warn">Belum tersambung — klik Sambungkan pada "Jurnal Guru → BK" di Pusat → Administrasi → Sambungan</span>@endif</p>
     <div class="scroll"><table class="tbl" style="font-size:14px">
-        <tr><td style="width:190px" class="mut">Alamat Absensi</td><td>{{ $absensiUrl ?: '-' }}</td></tr>
+        <tr><td style="width:190px" class="mut">Alamat Jurnal Guru</td><td>{{ $absensiUrl ?: '-' }}</td></tr>
         <tr><td class="mut">Izin kunci yang diperlukan</td><td><code>kehadiran:baca</code>, <code>kehadiran:tulis</code></td></tr>
     </table></div>
-    <div class="row" style="margin-top:12px"><form method="post" action="{{ route('admin.integrasi.absensi') }}">@csrf<button class="btn">Uji koneksi Absensi</button></form></div>
+    <div class="row" style="margin-top:12px"><form method="post" action="{{ route('admin.integrasi.absensi') }}">@csrf<button class="btn">Uji koneksi Jurnal Guru</button></form></div>
 </div>
 <div class="card"><h2>PKL</h2>
     <p style="margin:6px 0 10px">Status: @if($pklAktif)<span class="badge b-ok">Tersambung</span>@else<span class="badge b-warn">Belum tersambung — klik Sambungkan pada "PKL → BK" di Pusat → Administrasi → Sambungan</span>@endif</p>

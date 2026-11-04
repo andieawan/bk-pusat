@@ -14,7 +14,7 @@
 <div class="card card-tight" id="absen-kelas">
     <div style="padding:14px 16px;border-bottom:1px solid var(--line2)">
         <h2>Absensi Harian — {{ $k->nama }}</h2>
-        <small>Isi semua siswa sekaligus, lalu simpan sekali. Tersimpan langsung di aplikasi Absensi; status yang sudah diisi wali kelas/guru ikut tampil di sini.</small>
+        <small>Isi semua siswa sekaligus, lalu simpan sekali. Tersimpan langsung di aplikasi Jurnal Guru; status yang sudah diisi wali kelas/guru ikut tampil di sini.</small>
         <form method="get" action="{{ route('presensi') }}" class="row" style="margin-top:10px;gap:8px;flex-wrap:wrap">
             <input type="hidden" name="kelas" value="{{ $k->id }}"><input type="hidden" name="dari" value="{{ $dari }}"><input type="hidden" name="sampai" value="{{ $sampai }}">
             <label for="tgl-absen" class="mut" style="margin:0;align-self:center">Tanggal</label>
@@ -24,7 +24,7 @@
         </form>
     </div>
     @if($harian === null)
-        <div class="empty">Absensi tidak bisa dibaca sekarang, jadi lembar absensi belum bisa diisi.</div>
+        <div class="empty">Data kehadiran dari Jurnal Guru tidak bisa dibaca sekarang, jadi lembar absensi belum bisa diisi.</div>
     @elseif($siswa->isEmpty())
         <div class="empty">Tidak ada siswa aktif di kelas ini.</div>
     @else
@@ -64,7 +64,7 @@
 
 <div class="card">
     <h2>Tautan Ketua Kelas — {{ $k->nama }}</h2>
-    <p class="mut" style="font-size:12px">Tautan sementara (maks. 24 jam) untuk ketua kelas mengisi absensi harian di aplikasi Absensi, mis. saat wali kelas berhalangan.</p>
+    <p class="mut" style="font-size:12px">Tautan sementara (maks. 24 jam) untuk ketua kelas mengisi absensi harian di aplikasi Jurnal Guru, mis. saat wali kelas berhalangan.</p>
     @if($tokenBaru)
         <div class="share-box">
             <b>✓ Tautan siap dibagikan ke ketua kelas</b>

@@ -40,7 +40,7 @@ class PresensiController extends Controller
                 $galat = $e->getMessage();
             }
         } elseif ($k) {
-            $galat = 'Sambungan ke Absensi belum diatur (ABSENSI_URL dan ABSENSI_API_KEY di .env).';
+            $galat = 'Sambungan ke Jurnal Guru belum diatur. Nyalakan "Jurnal Guru → BK" di Pusat → Administrasi → Sambungan.';
         }
         $siswa = $k ? Siswa::aktif()->where('kelas_id', $k->id)->orderBy('nama')->get() : collect();
         $uuidSiswa = $siswa->keyBy('pusat_uuid');
@@ -84,11 +84,11 @@ class PresensiController extends Controller
         try {
             $r = AbsensiKlien::manualKelas((string) $k->pusat_uuid, $d['tanggal'], $entri, $this->me()->nama);
         } catch (\RuntimeException $e) {
-            return back()->withInput()->with('error', 'Gagal menyimpan ke Absensi: '.$e->getMessage());
+            return back()->withInput()->with('error', 'Gagal menyimpan ke Jurnal Guru: '.$e->getMessage());
         }
         Audit::catat('Absensi kelas BK', $this->me()->nama, "{$k->nama} {$d['tanggal']}: ".count($entri).' siswa');
 
-        return $balik->with('success', "Absensi {$k->nama} tanggal ".Dates::human($d['tanggal']).' tersimpan di Absensi ('
+        return $balik->with('success', "Absensi {$k->nama} tanggal ".Dates::human($d['tanggal']).' tersimpan di Jurnal Guru ('
             .(int) ($r['dibuat'] ?? 0).' baru, '.(int) ($r['diperbarui'] ?? 0).' diubah).');
     }
 
@@ -99,7 +99,7 @@ class PresensiController extends Controller
         try {
             $t = AbsensiKlien::buatDelegasi((string) $k->pusat_uuid, (int) ($d['jam'] ?? 24), $this->me()->nama);
         } catch (\RuntimeException $e) {
-            return back()->with('error', 'Gagal membuat tautan di Absensi: '.$e->getMessage());
+            return back()->with('error', 'Gagal membuat tautan di Jurnal Guru: '.$e->getMessage());
         }
         Audit::catat('Buat delegasi ketua kelas', $this->me()->nama, $k->nama);
 

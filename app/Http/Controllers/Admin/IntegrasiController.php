@@ -80,8 +80,8 @@ class IntegrasiController extends Controller
         $kurang = array_values(array_diff(['kehadiran:baca', 'kehadiran:tulis'], $scopes));
 
         return $kurang
-            ? back()->with('error', 'Terhubung ke Absensi, tetapi kunci API belum punya izin: '.implode(', ', $kurang).'.')
-            : back()->with('success', 'Terhubung ke Absensi. Kunci API benar dan izin lengkap.');
+            ? back()->with('error', 'Terhubung ke Jurnal Guru, tetapi kunci API belum punya izin: '.implode(', ', $kurang).'.')
+            : back()->with('success', 'Terhubung ke Jurnal Guru. Kunci API benar dan izin lengkap.');
     }
 
     public function ujiPkl()

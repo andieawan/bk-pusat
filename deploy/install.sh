@@ -204,7 +204,7 @@ cat <<LANJUT
   Berikutnya (rincian: docs/PASANG-BK.md):
    1. Atur reverse proxy (NPMplus) + DNS Cloudflare untuk ${APP_URL}
    2. Daftarkan aplikasi BK di Pusat Sekolah, isi PUSAT_* di .env
-   3. Buat kunci API di Absensi, isi ABSENSI_URL & ABSENSI_API_KEY di .env
+   3. Di Pusat → Administrasi → Sambungan: Sambungkan "Jurnal Guru → BK" (kunci dibuat otomatis)
    4. php artisan config:clear && php artisan bk:periksa
    5. (opsional) admin darurat: php artisan bk:buat-admin <username>
 LANJUT

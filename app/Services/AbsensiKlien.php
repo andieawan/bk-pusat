@@ -30,19 +30,19 @@ class AbsensiKlien
     private static function panggil(string $metode, string $path, array $data = []): array
     {
         if (! self::aktif()) {
-            throw new RuntimeException('Sambungan ke Absensi belum diatur. Nyalakan "Absensi → BK" di Pusat → Administrasi → Sambungan.');
+            throw new RuntimeException('Sambungan ke Jurnal Guru belum diatur. Nyalakan "Jurnal Guru → BK" di Pusat → Administrasi → Sambungan.');
         }
         try {
             $res = $metode === 'get' ? self::http()->get($path, $data) : self::http()->{$metode}($path, $data);
         } catch (\Throwable $e) {
             report($e);
-            throw new RuntimeException('Absensi tidak dapat dihubungi. Pastikan aplikasi Absensi menyala dan alamatnya di Pusat → Aplikasi benar.');
+            throw new RuntimeException('Jurnal Guru tidak dapat dihubungi. Pastikan aplikasi Jurnal Guru menyala dan alamatnya di Pusat → Aplikasi benar.');
         }
         if (! $res->successful()) {
             $galat = $res->json('error');
-            $pesan = (is_array($galat) ? ($galat['message'] ?? null) : $galat) ?: $res->json('message') ?: ($res->status() === 401 ? 'Kunci API Absensi salah atau dicabut.' : 'HTTP '.$res->status());
+            $pesan = (is_array($galat) ? ($galat['message'] ?? null) : $galat) ?: $res->json('message') ?: ($res->status() === 401 ? 'Kunci API Jurnal Guru salah atau dicabut.' : 'HTTP '.$res->status());
             if ($res->status() === 403) {
-                $pesan = 'Kunci API Absensi belum punya izin yang dibutuhkan ('.$pesan.').';
+                $pesan = 'Kunci API Jurnal Guru belum punya izin yang dibutuhkan ('.$pesan.').';
             }
             throw new RuntimeException($pesan);
         }
