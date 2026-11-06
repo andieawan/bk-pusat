@@ -17,8 +17,8 @@ class WebhookTest extends TestCase
     {
         parent::setUp();
         config(['pusat.enabled' => true, 'pusat.url' => 'https://p.test', 'pusat.client_id' => 'c', 'pusat.client_secret' => 's', 'pusat.webhook_secret' => 'wh']);
-        Kelas::create(['pusat_uuid' => 'k1', 'nama' => 'X TKJ 1', 'tahun_ajaran' => '2026/2027']);
-        Siswa::create(['pusat_uuid' => 's1', 'nis' => '1', 'nama' => 'Budi', 'kelas_id' => 1, 'status' => 'aktif']);
+        $k = Kelas::create(['pusat_uuid' => 'k1', 'nama' => 'X TKJ 1', 'tahun_ajaran' => '2026/2027']);
+        Siswa::create(['pusat_uuid' => 's1', 'nis' => '1', 'nama' => 'Budi', 'kelas_id' => $k->id, 'status' => 'aktif']);
     }
 
     private function kirim(string $event, array $data, string $id)
@@ -42,7 +42,7 @@ class WebhookTest extends TestCase
     public function test_kelas_belum_dikenal_mempertahankan_kelas_lama(): void
     {
         $this->kirim('siswa.diperbarui', ['uuid' => 's1', 'kelas_uuid' => 'belum-ada'], 'd1')->assertOk();
-        $this->assertSame(1, (int) Siswa::first()->kelas_id);
+        $this->assertSame(Kelas::where('pusat_uuid', 'k1')->value('id'), (int) Siswa::first()->kelas_id);
         $this->assertNotNull(PusatKlien::baca('perlu_sinkron'));
     }
 
