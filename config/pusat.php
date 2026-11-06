@@ -16,7 +16,7 @@ return [
     'ca_bundle' => env('PUSAT_CA_BUNDLE'),
 
     // Sinkron kelas & siswa otomatis tiap jam (selain webhook). Bawaan mati; tombol Admin → Integrasi selalu ada.
-    'sinkron_otomatis' => (bool) env('PUSAT_SINKRON_OTOMATIS', false),
+    'sinkron_otomatis' => (bool) env('PUSAT_SINKRON_OTOMATIS', true),
 
     // Peran di Pusat -> peran lokal BK. Wali kelas tidak berupa peran: ditentukan dari data kelas di Pusat
     // (guru yang menjadi "wali" sebuah kelas otomatis melihat siswa kelasnya). Admin Pusat = setara Guru BK.
