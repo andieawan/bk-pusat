@@ -61,7 +61,8 @@ class BkService
         return $r->rahasia && ! self::isCounselor($u);
     }
 
-    public static function save(User $u, string $jenis, ?BkCatatan $r, array $in, ?UploadedFile $file = null): BkCatatan
+    /** $catat = false dipakai impor massal (satu baris log untuk seluruh impor). */
+    public static function save(User $u, string $jenis, ?BkCatatan $r, array $in, ?UploadedFile $file = null, bool $catat = true): BkCatatan
     {
         $m = BkModules::get($jenis) ?? throw new UserError('Jenis catatan tidak dikenal.');
         $siswa = $r ? Siswa::find($r->siswa_id) : Siswa::find((int) ($in['siswa_id'] ?? 0)); // siswa tidak diganti saat edit
@@ -119,10 +120,10 @@ class BkService
         $label = BkModules::get($jenis)['label'].": {$siswa->nama} — ".($data['rahasia'] ? '(rahasia)' : $data['judul']);
         if ($r) {
             $r->update($data);
-            Audit::catat('Ubah catatan BK', $u->nama, $label);
+            $catat && Audit::catat('Ubah catatan BK', $u->nama, $label);
         } else {
             $r = BkCatatan::create($data + ['dicatat_oleh' => $u->id]);
-            Audit::catat('Tambah catatan BK', $u->nama, $label);
+            $catat && Audit::catat('Tambah catatan BK', $u->nama, $label);
         }
 
         return $r;

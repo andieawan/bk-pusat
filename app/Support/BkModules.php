@@ -3,7 +3,7 @@
 namespace App\Support;
 
 /**
- * Definisi modul BK terpadu. Satu tabel (bk_records), tiap "jenis" punya label & kolom sendiri.
+ * Definisi modul BK terpadu. Satu tabel (bk_catatan), tiap "jenis" punya label & kolom sendiri.
  * Keputusan desain (mengikuti rencana Aplikasi Manajemen BK):
  * - Pelanggaran: tanpa poin, tingkat Ringan/Sedang/Berat, hanya BK yang mencatat, sanksi ditentukan manual.
  * - Buku Kasus: bisa ditandai "Sangat Rahasia" (Wali Kelas/Kepsek hanya melihat "ada kasus", tanpa detail).

@@ -37,6 +37,7 @@
             foreach (\App\Support\BkModules::all() as $j => $mod) { $tabs[] = [['catatan', $j], $mod['label'], 'i-folder', null, $j]; }
             if ($me->isCounselor()) { $tabs[] = ['presensi', 'Presensi', 'i-check', 'presensi*']; }
             if ($me->isCounselor() && \App\Services\PklKlien::aktif()) { $tabs[] = ['pkl', 'PKL', 'i-users', 'pkl*']; }
+            if ($me->isCounselor()) { $tabs[] = ['impor', 'Impor', 'i-folder', 'impor*']; }
         }
         if ($me->isAdmin()) { $tabs[] = ['admin.integrasi', 'Integrasi', 'i-gear', 'admin.*']; }
     @endphp

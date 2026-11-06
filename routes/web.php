@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\IntegrasiController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BerandaController;
 use App\Http\Controllers\CatatanController;
+use App\Http\Controllers\ImporController;
 use App\Http\Controllers\PklController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\PusatSsoController;
@@ -44,6 +45,9 @@ Route::middleware(['auth', 'akun.aktif'])->group(function () {
         Route::post('/presensi/delegasi/cabut', [PresensiController::class, 'cabut'])->name('presensi.cabut');
         Route::get('/pkl', [PklController::class, 'index'])->name('pkl');
         Route::get('/pkl/siswa/{siswa}', [PklController::class, 'siswa'])->whereNumber('siswa')->name('pkl.siswa');
+        Route::get('/impor', [ImporController::class, 'index'])->name('impor');
+        Route::get('/impor/templat', [ImporController::class, 'templat'])->name('impor.templat');
+        Route::post('/impor', [ImporController::class, 'unggah'])->middleware('throttle:20,1')->name('impor.unggah');
     });
 
     Route::middleware('bk:admin')->prefix('admin')->name('admin.')->group(function () {
