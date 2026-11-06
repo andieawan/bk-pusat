@@ -47,9 +47,5 @@ sudo -u www-data php artisan bk:sinkron   # salin kelas & siswa, dan sambungan k
 ```
 Admin darurat (login password, bila SSO bermasalah): `sudo -u www-data php artisan bk:buat-admin namaadmin`. Matikan dengan `BK_LOGIN_LOKAL=false` bila tak diperlukan.
 
-## 5. Arahkan menu BK di Jurnal ke aplikasi BK
-Jurnal Guru masih punya menu BK bawaan. Setelah BK berjalan, isi `BK_URL=https://bk.smkibupakusari.sch.id` di `.env` Jurnal
-lalu `sudo -u www-data php artisan config:clear`: menu BK dan surat di Jurnal berubah menjadi tautan ke aplikasi BK.
-
 ## Pembaruan & cadangan
 `sudo bash deploy/update.sh` (dari folder aplikasi) dan `deploy/backup.sh` (jadwalkan di cron).
